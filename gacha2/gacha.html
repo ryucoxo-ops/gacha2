@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>문구점 뽑기 기계 🍬</title>
+  <style>
+    body {
+      background-color: #fff0f5;
+      color: #5d4037;
+      font-family: 'Apple SD Gothic Neo', sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 20px;
+      border: 3px solid #ffdeeb;
+    }
+    .machine {
+      width: 200px;
+      height: 200px;
+      background: #ffe4e1;
+      border-radius: 50%;
+      margin: 20px auto;
+      line-height: 200px;
+      font-size: 4rem;
+      border: 5px solid #ffb6c1;
+    }
+    .btn {
+      background-color: #ffb6c1;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .log-box {
+      margin-top: 20px;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      height: 150px;
+      overflow-y: auto;
+      padding: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>🎰 두근두근 뽑기</h2>
+    <div class="machine">🎁</div>
+    
+    <button class="btn" onclick="startGacha()">1코인으로 뽑기!</button>
+
+    <h3>📜 실시간 뽑기 로그</h3>
+    <div class="log-box" id="log-container">로그 불러오는 중...</div>
+    <br>
+    <a href="index.html">← 메인으로 돌아가기</a>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://xxxx.supabase.co";
+    const SUPABASE_KEY = "your-anon-key";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function startGacha() {
+      // 1. 코인 잔액 확인
+      const { data: user } = await supabase.from('users').select('coins').eq('username', 'guest').single();
+      if (!user || user.coins < 1) {
+        alert("코인이 부족합니다! 관리자 페이지에서 충전해주세요.");
+        return;
+      }
+
+      // 2. 물품 랜덤 뽑기
+      const { data: items } = await supabase.from('items').select('*');
+      if (!items || items.length === 0) {
+        alert("등록된 뽑기 물품이 없습니다. 관리자 페이지에서 물품을 추가해주세요!");
+        return;
+      }
+      const selectedItem = items[Math.floor(Math.random() * items.length)];
+
+      // 3. 코인 차감
+      await supabase.from('users').update({ coins: user.coins - 1 }).eq('username', 'guest');
+
+      // 4. 로그 저장
+      await supabase.from('gacha_logs').insert([{ username: 'guest', item_name: selectedItem.name }]);
+
+      alert(`🎉 축하합니다! [${selectedItem.name}]을(를) 뽑으셨습니다!`);
+      fetchLogs();
+    }
+
+    async function fetchLogs() {
+      const { data: logs } = await supabase.from('gacha_logs').select('*').order('created_at', { ascending: false });
+      const container = document.getElementById('log-container');
+      if (logs) {
+        container.innerHTML = logs.map(l => `<p>✨ <b>${l.username}</b>님이 [${l.item_name}]을 뽑았습니다.</p>`).join('');
+      }
+    }
+
+    fetchLogs();
+  </script>
+</body>
+</html>
