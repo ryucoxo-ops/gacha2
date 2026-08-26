@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포근한 복슬 문구점 🎀</title>
+  <style>
+    body {
+      background-color: #fff0f5;
+      color: #5d4037;
+      font-family: 'Apple SD Gothic Neo', sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 30px;
+      max-width: 380px;
+      margin: 0 auto;
+      box-shadow: 0 10px 25px rgba(255, 182, 193, 0.4);
+      border: 3px solid #ffdeeb;
+    }
+    .coin-badge {
+      background-color: #fff9e6;
+      border: 2px dashed #ffe082;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 20px 0;
+      font-size: 1.1rem;
+    }
+    .btn {
+      background-color: #ffd1dc;
+      border: none;
+      color: #4a4a4a;
+      padding: 14px 20px;
+      border-radius: 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+    .btn:hover { background-color: #ffb6c1; }
+    .btn-secondary { background-color: #e8e8e8; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="card">
+    <h1>🧸 복슬 문구점</h1>
+    <p>포근하고 귀여운 추억의 뽑기방입니다!</p>
+    
+    <div class="coin-badge">
+      🪙 보유 코인: <b id="coin-count">0</b> 개
+    </div>
+
+    <button class="btn" onclick="location.href='gacha.html'">🎰 뽑기하러 가기</button>
+    <button class="btn btn-secondary" onclick="location.href='admin.html'">🔑 관리자 페이지</button>
+  </div>
+
+  <script>
+    // ⚠️ 본인의 Supabase 정보로 교체하세요!
+    const SUPABASE_URL = "sb_publishable_8h_ccGjdjGBUZuEwiHkIGg_yrzpSLUG";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmbHZnc3JqaWxhd25wbGd5d2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NDUyNjMsImV4cCI6MjEwMzMyMTI2M30.nY7hcvVP-clPhXIUx_Pbefw4a1a4bv5kehiEs7PgVSs";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function getCoins() {
+      const { data } = await supabase.from('users').select('coins').eq('username', 'guest').single();
+      if (data) document.getElementById('coin-count').innerText = data.coins;
+    }
+    getCoins();
+  </script>
+</body>
+</html>
